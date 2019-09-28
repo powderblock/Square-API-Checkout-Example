@@ -1,8 +1,9 @@
 <?php
-// Include the Square Connect API resources
+// Include the Square Connect API
+//autoload.php contains the square API
 require_once('autoload.php');
 
-//Replace your access token and location ID
+//REPLACE your access token and location ID!
 $accessToken = 'REPLACE_ME';
 $locationId = 'REPLACE_ME';
 
@@ -19,11 +20,15 @@ $quantity = 1;
 $price = new \SquareConnect\Model\Money;
 
 //Set the base price PER ITEM (in cents)
+//Example: if quantity = 10 and setAmount(100), the actual price in checkout will be $10
+//This is because setAmount() is a PER ITEM cost.
 $price->setAmount(100); //100 means $1.00
+//Set US currency code
 $price->setCurrency('USD');
 
 //Create the line item and set details
 $book = new \SquareConnect\Model\CreateOrderRequestLineItem;
+//Set the item name that will appear on the checkout page
 $book->setName('ITEM NAME');
 $book->setQuantity((string)$quantity);
 $book->setBasePriceMoney($price);
@@ -43,12 +48,15 @@ $order->setLineItems($lineItems);
 ///Create Checkout request object.
 $checkout = new \SquareConnect\Model\CreateCheckoutRequest();
 
+//This setting is a bool
+//True makes the shipping info appear on the checkout page
 $checkout->setAskForShippingAddress(True);
 $checkout->setIdempotencyKey(uniqid()); //uniqid() generates a random string.
 $checkout->setOrder($order); //this is the order we created in the previous step.
 //Replace with the URL where you want to redirect your customers after transaction.
 $checkout->setRedirectUrl("https://example.com/thank-you.html");
 
+//Try catch because in rare cases, it can fail!
 try {
     $result = $checkoutClient->createCheckout(
       $locationId,
@@ -56,8 +64,9 @@ try {
     );
     //Save the checkout ID for verifying transactions
     $checkoutId = $result->getCheckout()->getId();
-    //Get the checkout URL that opens the checkout page.
+    //Generate the checkout URL for this transaction
     $checkoutUrl = $result->getCheckout()->getCheckoutPageUrl();
+    //Automacially REDIRECT the user to the checkout page on squareup.com
     header('Location: '.$checkoutUrl);
 } catch (Exception $e) {
     echo 'Exception when calling CheckoutApi->createCheckout: ', $e->getMessage(), PHP_EOL;
