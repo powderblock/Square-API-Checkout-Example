@@ -22,7 +22,7 @@ $price = new \SquareConnect\Model\Money;
 //Set the base price PER ITEM (in cents)
 //Example: if quantity = 10 and setAmount(100), the actual price in checkout will be $10
 //This is because setAmount() is a PER ITEM cost.
-$price->setAmount(100); //100 means $1.00
+$price->setAmount(1000); //100 means $1.00
 //Set US currency code
 $price->setCurrency('USD');
 
